@@ -1,0 +1,24 @@
+{
+  "name": "inject-migration-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "e2e/inject-migration-e2e/src",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/nx-plugin:e2e",
+      "options": {
+        "target": "inject-migration:build",
+        "jestConfig": "e2e/inject-migration-e2e/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["e2e/inject-migration-e2e/**/*.ts"]
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["inject-migration"]
+}

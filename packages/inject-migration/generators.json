@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "name": "inject-migration",
+  "version": "0.0.1",
+  "generators": {
+    "inject-migration": {
+      "factory": "./src/generators/inject-migration/generator",
+      "schema": "./src/generators/inject-migration/schema.json",
+      "description": "inject-migration generator"
+    }
+  }
+}
