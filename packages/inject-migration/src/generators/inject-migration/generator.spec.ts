@@ -6,6 +6,7 @@ import { expect } from '@jest/globals';
 import SIMPLE_COMPONENT from './files/simple.component.mock';
 import INJECT_DECORATOR_COMPONENT from './files/inject-decorator.component.mock';
 import OPTIONAL_DECORATOR_COMPONENT from './files/optional-decorator.component.mock';
+import CLASS_EXTEND_COMPONENT from './files/class-extend.component.mock';
 
 describe('migrate constructor parameters to class properties', () => {
   let tree: Tree;
@@ -22,6 +23,9 @@ describe('migrate constructor parameters to class properties', () => {
 
   it('should migrate inject decorated parameter', async () =>
     compareFileMigration(tree, INJECT_DECORATOR_COMPONENT));
+
+  it('should migrate component extending the class', async () =>
+    compareFileMigration(tree, CLASS_EXTEND_COMPONENT));
 });
 
 async function compareFileMigration(
