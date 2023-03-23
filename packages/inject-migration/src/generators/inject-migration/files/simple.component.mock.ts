@@ -3,7 +3,7 @@ export default [
   `
 @Component({})
 export class TestPseudoComponent {
-  constructor(private foo: Foo, public bar: Bar) {
+  constructor(public foo: Foo, private bar: Bar) {
   }
 }`,
 
@@ -11,8 +11,8 @@ export class TestPseudoComponent {
   `
 @Component({})
 export class TestPseudoComponent {
-  private foo = inject(Foo);
-  public bar = inject(Bar);
+  foo = inject(Foo);
+  private bar = inject(Bar);
   constructor() {}
 }`,
 ] as [string, string];

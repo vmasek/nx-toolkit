@@ -130,6 +130,10 @@ function extractConstructorParamsProperties(
           }
         }
 
+        if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
+          return acc;
+        }
+
         return { ...acc, modifiers: [...acc.modifiers, modifier] };
       },
       { modifiers: [], isOptional: false }
