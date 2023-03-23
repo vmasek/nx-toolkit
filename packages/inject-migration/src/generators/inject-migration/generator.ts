@@ -54,10 +54,12 @@ function fileVisitor(tree: Tree, schema: InjectMigrationGeneratorSchema) {
 
     const changes = getChanges(sourceFile.statements);
 
-    const updatedFile = ts.factory.updateSourceFile(sourceFile, changes);
-    const printer = ts.createPrinter();
+    if (changes.length > 0) {
+      const updatedFile = ts.factory.updateSourceFile(sourceFile, changes);
+      const printer = ts.createPrinter();
 
-    tree.write(filePath, printer.printFile(updatedFile));
+      tree.write(filePath, printer.printFile(updatedFile));
+    }
   };
 }
 
@@ -83,7 +85,8 @@ function getDecoratorArguments({
 function getChanges(
   statements: ts.NodeArray<ts.Statement>
 ): (ts.ClassDeclaration | ts.Statement)[] {
-  return statements.map((statement) => {
+  let shouldPerformChanges = false;
+  const changes = statements.map((statement) => {
     if (
       statement.kind === ts.SyntaxKind.ClassDeclaration &&
       ts.canHaveDecorators(statement)
@@ -112,19 +115,25 @@ function getChanges(
           return member;
         });
 
-        return ts.factory.updateClassDeclaration(
-          statement,
-          statement.modifiers,
-          statement.name,
-          statement.typeParameters,
-          statement.heritageClauses,
-          newClassMembers
-        );
+        shouldPerformChanges = newClassMembers.length > 0;
+
+        return shouldPerformChanges
+          ? ts.factory.updateClassDeclaration(
+              statement,
+              statement.modifiers,
+              statement.name,
+              statement.typeParameters,
+              statement.heritageClauses,
+              newClassMembers
+            )
+          : statement;
       }
     }
 
     return statement;
   });
+
+  return shouldPerformChanges ? changes : [];
 }
 
 function extractConstructorParamsProperties(
