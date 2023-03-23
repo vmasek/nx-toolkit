@@ -7,4 +7,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/inject-migration',
+  setupFilesAfterEnv: ['<rootDir>/jest-setup-matchers.ts'],
 };

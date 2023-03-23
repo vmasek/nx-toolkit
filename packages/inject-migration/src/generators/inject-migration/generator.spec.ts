@@ -1,26 +1,17 @@
 import { createTree } from '@nrwl/devkit/testing';
 import { formatFiles, Tree } from '@nrwl/devkit';
 import migration from './generator';
+import { join } from 'path';
+import { expect } from '@jest/globals';
 import SIMPLE_COMPONENT from './files/simple.component.mock';
 import INJECT_DECORATOR_COMPONENT from './files/inject-decorator.component.mock';
 import OPTIONAL_DECORATOR_COMPONENT from './files/optional-decorator.component.mock';
-import { join } from 'path';
-
-const normalize = (str) => str.trim().replace(/\r?\n/g, '\n');
 
 describe('migrate constructor parameters to class properties', () => {
   let tree: Tree;
 
-  // const libRoot = join('libs', 'my-lib');
-  // const sourceRoot = join(libRoot, 'src');
-
   beforeEach(() => {
     tree = createTree();
-    // addProjectConfiguration(tree, 'my-lib', {
-    //   projectType: 'library',
-    //   sourceRoot: sourceRoot,
-    //   root: libRoot,
-    // });
   });
 
   it('should migrate simple component', async () =>
@@ -35,7 +26,7 @@ describe('migrate constructor parameters to class properties', () => {
 
 async function compareFileMigration(
   tree: Tree,
-  [before, after]: [string, string],
+  [before, expected]: [string, string],
   sourceRoot = 'src'
 ): Promise<void> {
   const mockFileName = 'file-to-transform.ts';
@@ -49,8 +40,6 @@ async function compareFileMigration(
     name: 'file-to-transform.ts',
   });
 
-  const transformedFileString = normalize(tree.read(mockFilePath)?.toString());
-
   // Check that the constructor parameters were migrated to class properties
-  expect(transformedFileString).toContain(normalize(after));
+  expect(tree.read(mockFilePath)?.toString()).toMatchWithDiff(expected);
 }
