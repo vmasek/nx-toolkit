@@ -69,6 +69,16 @@ function getDecoratorName({ expression }: ts.Decorator): string | undefined {
     return expression.expression.getText();
   }
 }
+function getDecoratorArguments({
+  expression,
+}: ts.Decorator): ts.NodeArray<ts.Expression> {
+  if (
+    ts.isCallExpression(expression) &&
+    ts.isIdentifier(expression.expression)
+  ) {
+    return expression.arguments;
+  }
+}
 
 function getChanges(
   statements: ts.NodeArray<ts.Statement>
@@ -121,28 +131,43 @@ function extractConstructorParamsProperties(
   constructor: ts.ConstructorDeclaration
 ): ts.PropertyDeclaration[] {
   return constructor.parameters.map((parameter) => {
-    const { modifiers, isOptional } = parameter.modifiers.reduce(
-      (acc, modifier) => {
-        if (modifier.kind === ts.SyntaxKind.Decorator) {
-          const decoratorName = getDecoratorName(modifier);
-          if (decoratorName === 'Optional') {
-            return { ...acc, isOptional: true };
+    const { modifiers, isOptional, injectTokenIdentifierName } =
+      parameter.modifiers.reduce(
+        (acc, modifier) => {
+          if (modifier.kind === ts.SyntaxKind.Decorator) {
+            const decoratorName = getDecoratorName(modifier);
+            if (decoratorName === 'Optional') {
+              return { ...acc, isOptional: true };
+            } else if (decoratorName === 'Inject') {
+              return {
+                ...acc,
+                injectTokenIdentifierName:
+                  getDecoratorArguments(modifier)[0].getText(),
+              };
+            }
           }
-        }
 
-        if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
-          return acc;
-        }
+          if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
+            return acc;
+          }
 
-        return { ...acc, modifiers: [...acc.modifiers, modifier] };
-      },
-      { modifiers: [], isOptional: false }
-    );
+          return { ...acc, modifiers: [...acc.modifiers, modifier] };
+        },
+        {
+          modifiers: [],
+          isOptional: false,
+          injectTokenIdentifierName: undefined,
+        }
+      );
 
     const initializer = ts.factory.createCallExpression(
       ts.factory.createIdentifier('inject'),
       [],
-      [ts.factory.createIdentifier(parameter.type.getText())]
+      [
+        ts.factory.createIdentifier(
+          injectTokenIdentifierName || parameter.type.getText()
+        ),
+      ]
     );
 
     return ts.factory.createPropertyDeclaration(
@@ -151,7 +176,7 @@ function extractConstructorParamsProperties(
       isOptional
         ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
         : parameter.questionToken,
-      undefined,
+      injectTokenIdentifierName ? parameter.type : undefined,
       initializer
     );
   });

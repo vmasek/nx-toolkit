@@ -2,6 +2,7 @@ import { createTree } from '@nrwl/devkit/testing';
 import { formatFiles, Tree } from '@nrwl/devkit';
 import migration from './generator';
 import SIMPLE_COMPONENT from './files/simple.component.mock';
+import INJECT_DECORATOR_COMPONENT from './files/inject-decorator.component.mock';
 import OPTIONAL_DECORATOR_COMPONENT from './files/optional-decorator.component.mock';
 import { join } from 'path';
 
@@ -27,6 +28,9 @@ describe('migrate constructor parameters to class properties', () => {
 
   it('should migrate optional decorated parameter', async () =>
     compareFileMigration(tree, OPTIONAL_DECORATOR_COMPONENT));
+
+  it('should migrate inject decorated parameter', async () =>
+    compareFileMigration(tree, INJECT_DECORATOR_COMPONENT));
 });
 
 async function compareFileMigration(
