@@ -86,6 +86,7 @@ function getChanges(
   statements: ts.NodeArray<ts.Statement>
 ): (ts.ClassDeclaration | ts.Statement)[] {
   let shouldPerformChanges = false;
+
   const changes = statements.map((statement) => {
     if (
       statement.kind === ts.SyntaxKind.ClassDeclaration &&
@@ -133,7 +134,92 @@ function getChanges(
     return statement;
   });
 
-  return shouldPerformChanges ? changes : [];
+  if (shouldPerformChanges) {
+    return makeImportChanges(changes);
+  }
+  return [];
+}
+
+function isImportModule(
+  statement: ts.Statement,
+  module: string
+): statement is ts.ImportDeclaration {
+  if (ts.isImportDeclaration(statement)) {
+    if (
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === module
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function makeImportChanges(changes: ts.Statement[]): ts.Statement[] {
+  const existingImportIndex = changes.findIndex((statement) =>
+    isImportModule(statement, '@angular/core')
+  );
+  const angularCoreModuleImport = changes[
+    existingImportIndex
+  ] as ts.ImportDeclaration;
+
+  if (angularCoreModuleImport) {
+    if (
+      !angularCoreModuleImport.importClause.namedBindings
+        .getText()
+        .includes('inject')
+    ) {
+      const updatedImport = ts.factory.updateImportDeclaration(
+        angularCoreModuleImport,
+        angularCoreModuleImport.modifiers,
+        ts.factory.updateImportClause(
+          angularCoreModuleImport.importClause,
+          false,
+          undefined,
+          ts.factory.createNamedImports([
+            ...(ts.isNamedImports(
+              angularCoreModuleImport.importClause.namedBindings
+            )
+              ? angularCoreModuleImport.importClause.namedBindings.elements
+              : []),
+            ts.factory.createImportSpecifier(
+              false,
+              undefined,
+              ts.factory.createIdentifier('inject')
+            ),
+          ])
+        ),
+        angularCoreModuleImport.moduleSpecifier,
+        angularCoreModuleImport.assertClause
+      );
+
+      if (existingImportIndex !== -1) {
+        changes[existingImportIndex] = updatedImport;
+      }
+
+      return changes;
+    }
+  } else {
+    const newImport = ts.factory.createImportDeclaration(
+      undefined,
+      ts.factory.createImportClause(
+        false,
+        undefined,
+        ts.factory.createNamedImports([
+          ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier('inject')
+          ),
+        ])
+      ),
+      ts.factory.createStringLiteral('@angular/core')
+    );
+    return [newImport, ...changes];
+  }
+
+  return changes;
 }
 
 function extractConstructorParamsProperties(

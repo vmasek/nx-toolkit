@@ -13,6 +13,7 @@ export class FormFieldComponent {
 
   // after migration
   `
+import { inject } from '@angular/core';
 @Component({})
 export class FormFieldComponent {
   @Host()

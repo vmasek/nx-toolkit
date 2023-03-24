@@ -13,6 +13,7 @@ export class TestPseudoComponent extends MyClass {
 
   // after migration
   `
+import { inject } from '@angular/core';
 abstract class MyClass {
   protected constructor(bar: Bar) {}
 }

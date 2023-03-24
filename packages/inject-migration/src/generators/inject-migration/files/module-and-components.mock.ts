@@ -1,6 +1,9 @@
 export default [
   // before migration
   `
+import { Component, NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
 @Component({})
 export class ComponentOne {
   constructor(public readonly wololo: Foo) {
@@ -22,6 +25,8 @@ export class MyModule {}
 
   // after migration
   `
+import { Component, NgModule, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 @Component({})
 export class ComponentOne {
   readonly wololo = inject(Foo);

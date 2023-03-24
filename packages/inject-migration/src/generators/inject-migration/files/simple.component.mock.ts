@@ -9,6 +9,7 @@ export class TestPseudoComponent {
 
   // after migration
   `
+import { inject } from '@angular/core';
 @Component({})
 export class TestPseudoComponent {
   foo = inject(Foo);
