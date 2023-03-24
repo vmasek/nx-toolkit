@@ -11,9 +11,7 @@ export const toMatchWithDiff: MatcherFunction<[expected: string]> = (
 
   if (normalizedActual === normalizedExpected) {
     return {
-      message: () =>
-        // `this` context will have correct typings
-        `Expected result matches the actual.\n${actual}`,
+      message: () => `Expected result matches the actual.\n${normalizedActual}`,
       pass: true,
     };
   } else {
@@ -21,9 +19,10 @@ export const toMatchWithDiff: MatcherFunction<[expected: string]> = (
       message: () =>
         [
           `Expected result does not match the actual.`,
-          `Received actual:\n${actual}\n`,
+          `Received actual:\n${normalizedActual}\n`,
+          `Received expected:\n${normalizedExpected}\n`,
           `Diff of expected vs actual:\n`,
-          `${diff(expected, actual)}`,
+          `${diff(normalizedExpected, normalizedActual)}`,
         ].join('\n'),
       pass: false,
     };
