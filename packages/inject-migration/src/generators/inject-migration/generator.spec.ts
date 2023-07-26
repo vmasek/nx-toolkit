@@ -8,6 +8,7 @@ import INJECT_DECORATOR_COMPONENT from './files/inject-decorator.component.mock'
 import OPTIONAL_DECORATOR_COMPONENT from './files/optional-decorator.component.mock';
 import CLASS_EXTEND_COMPONENT from './files/class-extend.component.mock';
 import MODULE_AND_COMPONENT from './files/module-and-components.mock';
+import EXPRESSION_COMPONENT from './files/expression-component.mock';
 
 describe('migrate constructor parameters to class properties', () => {
   let tree: Tree;
@@ -30,6 +31,9 @@ describe('migrate constructor parameters to class properties', () => {
 
   it('should migrate file holding components and module', async () =>
     compareFileMigration(tree, MODULE_AND_COMPONENT));
+
+  it('should skip params without modifiers used for property assignment in constructor ', async () =>
+    compareFileMigration(tree, EXPRESSION_COMPONENT));
 });
 
 async function compareFileMigration(

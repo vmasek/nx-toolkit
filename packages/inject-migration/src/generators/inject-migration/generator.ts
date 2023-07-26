@@ -35,7 +35,7 @@ export default async function (
 }
 
 function fileVisitor(tree: Tree, schema: InjectMigrationGeneratorSchema) {
-  return (filePath) => {
+  return (filePath: string) => {
     if (!filePath.endsWith('.ts') || !filePath.includes(schema.name)) {
       return;
     }
@@ -225,54 +225,66 @@ function makeImportChanges(changes: ts.Statement[]): ts.Statement[] {
 function extractConstructorParamsProperties(
   constructor: ts.ConstructorDeclaration
 ): ts.PropertyDeclaration[] {
-  return constructor.parameters.map((parameter) => {
-    const { modifiers, isOptional, injectTokenIdentifierName } =
-      parameter.modifiers.reduce(
-        (acc, modifier) => {
-          if (modifier.kind === ts.SyntaxKind.Decorator) {
-            const decoratorName = getDecoratorName(modifier);
-            if (decoratorName === 'Optional') {
-              return { ...acc, isOptional: true };
-            } else if (decoratorName === 'Inject') {
-              return {
-                ...acc,
-                injectTokenIdentifierName:
-                  getDecoratorArguments(modifier)[0].getText(),
-              };
+  return constructor.parameters
+    .filter((parameter) => parameter.modifiers?.length)
+    .map((parameter) => {
+      const { modifiers, isOptional, injectTokenIdentifierName } =
+        parameter.modifiers.reduce<{
+          modifiers: ts.NodeArray<ts.ModifierLike>;
+          isOptional?: boolean;
+          injectTokenIdentifierName?: string;
+        }>(
+          (acc, modifier) => {
+            if (modifier.kind === ts.SyntaxKind.Decorator) {
+              const decoratorName = getDecoratorName(modifier);
+              if (decoratorName === 'Optional') {
+                return { ...acc, isOptional: true };
+              } else if (decoratorName === 'Inject') {
+                return {
+                  ...acc,
+                  injectTokenIdentifierName:
+                    getDecoratorArguments(modifier)[0].getText(),
+                };
+              }
             }
-          }
 
-          if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
-            return acc;
-          }
+            if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
+              return acc;
+            }
 
-          return { ...acc, modifiers: [...acc.modifiers, modifier] };
-        },
-        {
-          modifiers: [],
-          isOptional: false,
-          injectTokenIdentifierName: undefined,
-        }
+            return {
+              ...acc,
+              modifiers: [
+                ...acc.modifiers,
+                modifier,
+              ] as unknown as ts.NodeArray<ts.ModifierLike>,
+            };
+          },
+          {
+            modifiers: [] as unknown as ts.NodeArray<ts.ModifierLike>,
+            isOptional: false,
+            injectTokenIdentifierName: undefined,
+          }
+        );
+
+      const initializer = ts.factory.createCallExpression(
+        ts.factory.createIdentifier('inject'),
+        [],
+        [
+          ts.factory.createIdentifier(
+            injectTokenIdentifierName || parameter.type.getText()
+          ),
+        ]
       );
 
-    const initializer = ts.factory.createCallExpression(
-      ts.factory.createIdentifier('inject'),
-      [],
-      [
-        ts.factory.createIdentifier(
-          injectTokenIdentifierName || parameter.type.getText()
-        ),
-      ]
-    );
-
-    return ts.factory.createPropertyDeclaration(
-      modifiers,
-      parameter.name.getText(),
-      isOptional
-        ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
-        : parameter.questionToken,
-      injectTokenIdentifierName ? parameter.type : undefined,
-      initializer
-    );
-  });
+      return ts.factory.createPropertyDeclaration(
+        modifiers,
+        parameter.name.getText(),
+        isOptional
+          ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
+          : parameter.questionToken,
+        injectTokenIdentifierName ? parameter.type : undefined,
+        initializer
+      );
+    });
 }
