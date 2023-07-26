@@ -32,7 +32,7 @@ describe('migrate constructor parameters to class properties', () => {
   it('should migrate file holding components and module', async () =>
     compareFileMigration(tree, MODULE_AND_COMPONENT));
 
-  it('should skip params without modifiers used for property assignment in constructor ', async () =>
+  it('should skip params without modifiers used for property assignment in constructor', async () =>
     compareFileMigration(tree, EXPRESSION_COMPONENT));
 });
 

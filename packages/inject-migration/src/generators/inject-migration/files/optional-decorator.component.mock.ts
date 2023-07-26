@@ -8,6 +8,8 @@ export class FormFieldComponent {
     @Host()
     @SkipSelf()
     private readonly container: ControlContainer,
+    @Self()
+    public foo: Foo,
   ) {}
 }`,
 
@@ -16,9 +18,12 @@ export class FormFieldComponent {
 import { inject } from '@angular/core';
 @Component({})
 export class FormFieldComponent {
-  @Host()
-  @SkipSelf()
-  private readonly container? = inject(ControlContainer);
+  private readonly container = inject(ControlContainer, {
+    optional: true,
+    host: true,
+    skipSelf: true,
+  });
+  foo = inject(Foo, { self: true });
   constructor() {}
 }`,
 ] as [string, string];

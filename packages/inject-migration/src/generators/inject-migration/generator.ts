@@ -6,6 +6,7 @@ import {
 } from '@nrwl/devkit';
 import * as ts from 'typescript';
 import { InjectMigrationGeneratorSchema } from './schema';
+import { lowerCaseFirstLetter } from './files/utils';
 
 const SUPPORTED_MIGRATION_TARGETS = [
   'Component',
@@ -228,17 +229,28 @@ function extractConstructorParamsProperties(
   return constructor.parameters
     .filter((parameter) => parameter.modifiers?.length)
     .map((parameter) => {
-      const { modifiers, isOptional, injectTokenIdentifierName } =
+      const { modifiers, optionsProperties, injectTokenIdentifierName } =
         parameter.modifiers.reduce<{
           modifiers: ts.NodeArray<ts.ModifierLike>;
-          isOptional?: boolean;
           injectTokenIdentifierName?: string;
+          optionsProperties: ts.PropertyAssignment[];
         }>(
           (acc, modifier) => {
             if (modifier.kind === ts.SyntaxKind.Decorator) {
               const decoratorName = getDecoratorName(modifier);
-              if (decoratorName === 'Optional') {
-                return { ...acc, isOptional: true };
+              if (
+                ['Optional', 'Self', 'SkipSelf', 'Host'].includes(decoratorName)
+              ) {
+                return {
+                  ...acc,
+                  optionsProperties: [
+                    ...acc.optionsProperties,
+                    ts.factory.createPropertyAssignment(
+                      lowerCaseFirstLetter(decoratorName),
+                      ts.factory.createTrue()
+                    ),
+                  ],
+                };
               } else if (decoratorName === 'Inject') {
                 return {
                   ...acc,
@@ -262,7 +274,7 @@ function extractConstructorParamsProperties(
           },
           {
             modifiers: [] as unknown as ts.NodeArray<ts.ModifierLike>,
-            isOptional: false,
+            optionsProperties: [] as unknown as ts.PropertyAssignment[],
             injectTokenIdentifierName: undefined,
           }
         );
@@ -274,15 +286,16 @@ function extractConstructorParamsProperties(
           ts.factory.createIdentifier(
             injectTokenIdentifierName || parameter.type.getText()
           ),
+          ...(optionsProperties.length
+            ? [ts.factory.createObjectLiteralExpression(optionsProperties)]
+            : []),
         ]
       );
 
       return ts.factory.createPropertyDeclaration(
         modifiers,
         parameter.name.getText(),
-        isOptional
-          ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
-          : parameter.questionToken,
+        parameter.questionToken,
         injectTokenIdentifierName ? parameter.type : undefined,
         initializer
       );
