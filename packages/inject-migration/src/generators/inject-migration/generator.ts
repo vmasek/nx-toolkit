@@ -114,13 +114,17 @@ function getChanges(
 
             const newProperties = extractConstructorParamsProperties(member);
 
+            if (newProperties.length === 0) {
+              shouldPerformChanges = false;
+              return member;
+            }
+
+            shouldPerformChanges = true;
             return [...newProperties, newConstructor];
           }
 
           return member;
         });
-
-        shouldPerformChanges = newClassMembers.length > 0;
 
         return shouldPerformChanges
           ? ts.factory.updateClassDeclaration(
