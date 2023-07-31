@@ -6,11 +6,7 @@ import {
 } from '@nrwl/devkit';
 import * as ts from 'typescript';
 import { InjectMigrationGeneratorSchema } from './schema';
-import {
-  escapeNewLines,
-  lowerCaseFirstLetter,
-  restoreNewLines,
-} from './files/utils';
+import { escapeNewLines, lowerCaseFirstLetter, restoreNewLines } from './utils';
 
 const SUPPORTED_MIGRATION_TARGETS = [
   'Component',
