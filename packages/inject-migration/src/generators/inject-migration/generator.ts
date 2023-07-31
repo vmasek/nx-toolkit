@@ -17,27 +17,30 @@ const SUPPORTED_MIGRATION_TARGETS = [
 
 export default async function (
   tree: Tree,
-  schema: InjectMigrationGeneratorSchema
+  { projectName }: InjectMigrationGeneratorSchema
 ): Promise<void> {
   const projects = getProjects(tree);
 
   if (projects.size > 0) {
     for (const [name, project] of projects) {
+      if (projectName && projectName !== name) {
+        return;
+      }
       // TODO: rewrite to nicer prompt
       console.info(`Running migration for project ${name}`);
 
-      visitNotIgnoredFiles(tree, project.root, fileVisitor(tree, schema));
+      visitNotIgnoredFiles(tree, project.root, fileVisitor(tree));
     }
   } else {
-    visitNotIgnoredFiles(tree, '.', fileVisitor(tree, schema));
+    visitNotIgnoredFiles(tree, '.', fileVisitor(tree));
   }
 
   await formatFiles(tree);
 }
 
-function fileVisitor(tree: Tree, schema: InjectMigrationGeneratorSchema) {
+function fileVisitor(tree: Tree) {
   return (filePath: string) => {
-    if (!filePath.endsWith('.ts') || !filePath.includes(schema.name)) {
+    if (!filePath.endsWith('.ts')) {
       return;
     }
 

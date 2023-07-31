@@ -1,3 +1,3 @@
 export interface InjectMigrationGeneratorSchema {
-  name: string;
+  projectName?: string;
 }

@@ -5,15 +5,15 @@
   "title": "",
   "type": "object",
   "properties": {
-    "name": {
+    "project": {
       "type": "string",
-      "description": "",
+      "description": "Limit to target project",
       "$default": {
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "What name would you like to use?"
+      "x-prompt": "What project name should migration run for (default/empty is all)?"
     }
   },
-  "required": ["name"]
+  "required": []
 }
