@@ -27,6 +27,7 @@ export class MyModule {}
   `
 import { Component, NgModule, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 @Component({})
 export class ComponentOne {
   readonly wololo = inject(Foo);
@@ -34,11 +35,13 @@ export class ComponentOne {
     wololo.subscribe();
   }
 }
+
 @Component({})
 export class ComponentTwo {
   host = inject(Host);
   constructor() {}
 }
+
 @NgModule({
   imports: [CommonModule],
   declarations: [ComponentOne, ComponentTwo],

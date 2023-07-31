@@ -36,7 +36,7 @@ describe('migrate constructor parameters to class properties', () => {
   it('should skip params without modifiers used for property assignment in constructor', async () =>
     compareFileMigration(tree, EXPRESSION_COMPONENT));
 
-  it('app component', async () =>
+  it('should skip touching constructor as it has just logic and no params', async () =>
     compareFileMigration(tree, LOGIC_WITHOIUT_PARAMS));
 });
 

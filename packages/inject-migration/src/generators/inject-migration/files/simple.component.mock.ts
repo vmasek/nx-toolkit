@@ -1,6 +1,8 @@
 export default [
   // before migration
   `
+import { Component } from '@angular/core';
+
 @Component({})
 export class TestPseudoComponent {
   constructor(public foo: Foo, private bar: Bar) {
@@ -9,7 +11,8 @@ export class TestPseudoComponent {
 
   // after migration
   `
-import { inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
+
 @Component({})
 export class TestPseudoComponent {
   foo = inject(Foo);

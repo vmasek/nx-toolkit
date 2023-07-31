@@ -6,7 +6,11 @@ import {
 } from '@nrwl/devkit';
 import * as ts from 'typescript';
 import { InjectMigrationGeneratorSchema } from './schema';
-import { lowerCaseFirstLetter } from './files/utils';
+import {
+  escapeNewLines,
+  lowerCaseFirstLetter,
+  restoreNewLines,
+} from './files/utils';
 
 const SUPPORTED_MIGRATION_TARGETS = [
   'Component',
@@ -51,18 +55,19 @@ function fileVisitor(tree: Tree) {
 
     const sourceFile = ts.createSourceFile(
       filePath,
-      fileContent,
+      escapeNewLines(fileContent),
       ts.ScriptTarget.Latest,
       true
     );
 
     const changes = getChanges(sourceFile.statements);
 
+    console.log('~~ ', filePath, changes.length);
     if (changes.length > 0) {
       const updatedFile = ts.factory.updateSourceFile(sourceFile, changes);
       const printer = ts.createPrinter();
 
-      tree.write(filePath, printer.printFile(updatedFile));
+      tree.write(filePath, restoreNewLines(printer.printFile(updatedFile)));
     }
   };
 }
@@ -141,6 +146,8 @@ function getChanges(
 
     return statement;
   });
+
+  console.log('~~ ', { shouldPerformChanges });
 
   if (shouldPerformChanges) {
     return makeImportChanges(changes);

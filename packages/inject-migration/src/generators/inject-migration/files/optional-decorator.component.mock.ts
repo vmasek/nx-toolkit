@@ -1,6 +1,8 @@
 export default [
   // before migration
   `
+import { Component } from '@angular/core';
+  
 @Component({})
 export class FormFieldComponent {
   constructor(
@@ -15,7 +17,8 @@ export class FormFieldComponent {
 
   // after migration
   `
-import { inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
+
 @Component({})
 export class FormFieldComponent {
   private readonly container = inject(ControlContainer, {
