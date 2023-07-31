@@ -109,7 +109,14 @@ function getChanges(
             const newConstructor = ts.factory.updateConstructorDeclaration(
               member,
               member.modifiers,
-              [],
+              member.parameters.filter(
+                ({ modifiers }) =>
+                  !modifiers?.some(
+                    (modifier) =>
+                      modifier.kind === ts.SyntaxKind.PublicKeyword ||
+                      modifier.kind === ts.SyntaxKind.PrivateKeyword
+                  )
+              ),
               member.body
             );
 
@@ -233,10 +240,10 @@ function makeImportChanges(changes: ts.Statement[]): ts.Statement[] {
   return changes;
 }
 
-function extractConstructorParamsProperties(
-  constructor: ts.ConstructorDeclaration
-): ts.PropertyDeclaration[] {
-  return constructor.parameters
+function extractConstructorParamsProperties({
+  parameters,
+}: ts.ConstructorDeclaration): ts.PropertyDeclaration[] {
+  return parameters
     .filter((parameter) => parameter.modifiers?.length)
     .map((parameter) => {
       const { modifiers, optionsProperties, injectTokenIdentifierName } =

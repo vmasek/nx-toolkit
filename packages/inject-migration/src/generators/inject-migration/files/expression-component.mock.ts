@@ -7,7 +7,10 @@ import { a, inject, b } from '@angular/core';
 export class ComponentTwo {
   _host: Host = null;
 
-  constructor(host: Host) {
+  constructor(
+    private wololo: Wololo,
+    host: Host,
+  ) {
     this._host = host;
   }
 }
@@ -20,6 +23,7 @@ import { a, inject, b } from '@angular/core';
 @Component({})
 export class ComponentTwo {
   _host: Host = null;
+  private wololo = inject(Wololo);
 
   constructor(host: Host) {
     this._host = host;
