@@ -306,7 +306,7 @@ function extractConstructorParamsProperties(
         modifiers,
         parameter.name.getText(),
         parameter.questionToken,
-        injectTokenIdentifierName ? parameter.type : undefined,
+        undefined,
         initializer
       );
     });
