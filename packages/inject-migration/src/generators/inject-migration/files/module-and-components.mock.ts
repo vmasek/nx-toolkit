@@ -39,7 +39,6 @@ export class ComponentOne {
 @Component({})
 export class ComponentTwo {
   host = inject(Host);
-  constructor() {}
 }
 
 @NgModule({

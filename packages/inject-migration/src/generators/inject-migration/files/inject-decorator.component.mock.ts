@@ -19,6 +19,5 @@ import { Component, Inject, inject } from '@angular/core';
 @Component({})
 export class TestPseudoComponent {
   readonly lang = inject(TRANSLATION_TEXTS);
-  constructor() {}
 }`,
 ] as [string, string];

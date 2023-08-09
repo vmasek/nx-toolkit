@@ -27,6 +27,5 @@ export class FormFieldComponent {
     skipSelf: true,
   });
   foo = inject(Foo, { self: true });
-  constructor() {}
 }`,
 ] as [string, string];

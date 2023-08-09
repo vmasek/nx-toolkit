@@ -87,6 +87,13 @@ function getDecoratorArguments({
   }
 }
 
+function isConstructorEmpty(cxtor: ts.ConstructorDeclaration) {
+  const hasParameters = cxtor.parameters.length > 0;
+  const hasBody = cxtor.body?.getText().trim() !== '{}';
+
+  return !hasParameters && !hasBody;
+}
+
 function getChanges(
   statements: ts.NodeArray<ts.Statement>
 ): (ts.ClassDeclaration | ts.Statement)[] {
@@ -128,6 +135,11 @@ function getChanges(
             }
 
             shouldPerformChanges = true;
+
+            if (isConstructorEmpty(newConstructor)) {
+              return newProperties;
+            }
+
             return [...newProperties, newConstructor];
           }
 

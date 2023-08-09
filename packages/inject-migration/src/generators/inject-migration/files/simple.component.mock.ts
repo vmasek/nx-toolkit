@@ -17,6 +17,5 @@ import { Component, inject } from '@angular/core';
 export class TestPseudoComponent {
   foo = inject(Foo);
   private bar = inject(Bar);
-  constructor() {}
 }`,
 ] as [string, string];
