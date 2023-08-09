@@ -258,6 +258,7 @@ function extractConstructorParamsProperties({
               if (
                 ['Optional', 'Self', 'SkipSelf', 'Host'].includes(decoratorName)
               ) {
+                // transform these decorators to inject options
                 return {
                   ...acc,
                   optionsProperties: [
@@ -269,6 +270,7 @@ function extractConstructorParamsProperties({
                   ],
                 };
               } else if (decoratorName === 'Inject') {
+                // safe the identifier name for inject token
                 return {
                   ...acc,
                   injectTokenIdentifierName:
@@ -278,6 +280,7 @@ function extractConstructorParamsProperties({
             }
 
             if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
+              // if parameter is marked as public, continue without keeping it as it is default for class properties
               return acc;
             }
 
