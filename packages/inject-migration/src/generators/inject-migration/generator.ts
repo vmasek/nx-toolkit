@@ -165,7 +165,7 @@ function getChanges(
   console.log('~~ ', { shouldPerformChanges });
 
   if (shouldPerformChanges) {
-    return makeImportChanges(changes);
+    return addInjectImport(changes);
   }
   return [];
 }
@@ -186,7 +186,7 @@ function isImportModule(
   return false;
 }
 
-function makeImportChanges(changes: ts.Statement[]): ts.Statement[] {
+function addInjectImport(changes: ts.Statement[]): ts.Statement[] {
   const existingImportIndex = changes.findIndex((statement) =>
     isImportModule(statement, '@angular/core')
   );
