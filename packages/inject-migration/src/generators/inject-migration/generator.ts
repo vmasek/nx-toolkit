@@ -87,9 +87,9 @@ function getDecoratorArguments({
   }
 }
 
-function isConstructorEmpty(cxtor: ts.ConstructorDeclaration) {
-  const hasParameters = cxtor.parameters.length > 0;
-  const hasBody = cxtor.body?.getText().trim() !== '{}';
+function isConstructorEmpty({ body, parameters }: ts.ConstructorDeclaration) {
+  const hasParameters = parameters.length > 0;
+  const hasBody = body?.getText().trim() !== '{}';
 
   return !hasParameters && !hasBody;
 }
