@@ -9,6 +9,7 @@ import OPTIONAL_DECORATOR_COMPONENT from './files/optional-decorator.component.m
 import CLASS_EXTEND_COMPONENT from './files/class-extend.component.mock';
 import MODULE_AND_COMPONENT from './files/module-and-components.mock';
 import EXPRESSION_COMPONENT from './files/expression-component.mock';
+import COMPLEX_SERVICE from './files/complex.service.mock';
 import LOGIC_WITHOIUT_PARAMS from './files/logic-without-params-component.mock';
 
 describe('migrate constructor parameters to class properties', () => {
@@ -35,6 +36,9 @@ describe('migrate constructor parameters to class properties', () => {
 
   it('should skip params without modifiers used for property assignment in constructor', async () =>
     compareFileMigration(tree, EXPRESSION_COMPONENT));
+
+  it('should migrate complex service', async () =>
+    compareFileMigration(tree, COMPLEX_SERVICE));
 
   it('should skip touching constructor as it has just logic and no params', async () =>
     compareFileMigration(tree, LOGIC_WITHOIUT_PARAMS));

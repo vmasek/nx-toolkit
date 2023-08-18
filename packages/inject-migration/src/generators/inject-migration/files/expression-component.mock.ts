@@ -22,8 +22,8 @@ import { a, inject, b } from '@angular/core';
 
 @Component({})
 export class ComponentTwo {
-  _host: Host = null;
   private wololo = inject(Wololo);
+  _host: Host = null;
 
   constructor(host: Host) {
     this._host = host;

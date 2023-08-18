@@ -111,40 +111,43 @@ function getChanges(
       });
 
       if (isSupportedClass) {
-        const newClassMembers = statement.members.flatMap((member) => {
-          if (ts.isConstructorDeclaration(member)) {
-            const newConstructor = ts.factory.updateConstructorDeclaration(
-              member,
-              member.modifiers,
-              member.parameters.filter(
-                ({ modifiers }) =>
-                  !modifiers?.some(
-                    (modifier) =>
-                      modifier.kind === ts.SyntaxKind.PublicKeyword ||
-                      modifier.kind === ts.SyntaxKind.PrivateKeyword
-                  )
-              ),
-              member.body
-            );
+        const newClassMembers = statement.members.reduce<ts.ClassElement[]>(
+          (acc, member) => {
+            if (ts.isConstructorDeclaration(member)) {
+              const newConstructor = ts.factory.updateConstructorDeclaration(
+                member,
+                member.modifiers,
+                member.parameters.filter(
+                  ({ modifiers }) =>
+                    !modifiers?.some(
+                      (modifier) =>
+                        modifier.kind === ts.SyntaxKind.PublicKeyword ||
+                        modifier.kind === ts.SyntaxKind.PrivateKeyword
+                    )
+                ),
+                member.body
+              );
 
-            const newProperties = extractConstructorParamsProperties(member);
+              const newProperties = extractConstructorParamsProperties(member);
 
-            if (newProperties.length === 0) {
-              shouldPerformChanges = false;
-              return member;
+              if (newProperties.length === 0) {
+                shouldPerformChanges = false;
+                return [...acc, member];
+              }
+
+              shouldPerformChanges = true;
+
+              if (isConstructorEmpty(newConstructor)) {
+                return [...newProperties, ...acc];
+              }
+
+              return [...newProperties, ...acc, newConstructor];
             }
 
-            shouldPerformChanges = true;
-
-            if (isConstructorEmpty(newConstructor)) {
-              return newProperties;
-            }
-
-            return [...newProperties, newConstructor];
-          }
-
-          return member;
-        });
+            return [...acc, member];
+          },
+          []
+        );
 
         return shouldPerformChanges
           ? ts.factory.updateClassDeclaration(
