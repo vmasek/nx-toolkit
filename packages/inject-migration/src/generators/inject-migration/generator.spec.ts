@@ -5,6 +5,7 @@ import { join } from 'path';
 import { expect } from '@jest/globals';
 import SIMPLE_COMPONENT from './files/simple.component.mock';
 import INJECT_DECORATOR_COMPONENT from './files/inject-decorator.component.mock';
+import TYPE_GENERICS from './files/type-generics.component.mock';
 import OPTIONAL_DECORATOR_COMPONENT from './files/optional-decorator.component.mock';
 import CLASS_EXTEND_COMPONENT from './files/class-extend.component.mock';
 import MODULE_AND_COMPONENT from './files/module-and-components.mock';
@@ -27,6 +28,9 @@ describe('migrate constructor parameters to class properties', () => {
 
   it('should migrate inject decorated parameter', async () =>
     compareFileMigration(tree, INJECT_DECORATOR_COMPONENT));
+
+  it('should migrate state the type with generics correctly ', async () =>
+    compareFileMigration(tree, TYPE_GENERICS));
 
   it('should migrate component extending the class', async () =>
     compareFileMigration(tree, CLASS_EXTEND_COMPONENT));

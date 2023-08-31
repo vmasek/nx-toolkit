@@ -260,7 +260,7 @@ function extractConstructorParamsProperties({
 }: ts.ConstructorDeclaration): ts.PropertyDeclaration[] {
   return parameters
     .filter((parameter) => parameter.modifiers?.length)
-    .map((parameter) => {
+    .map((parameter: ts.ParameterDeclaration) => {
       const { modifiers, optionsProperties, injectTokenIdentifierName } =
         parameter.modifiers.reduce<{
           modifiers: ts.NodeArray<ts.ModifierLike>;
@@ -314,13 +314,21 @@ function extractConstructorParamsProperties({
           }
         );
 
+      const isTypeGenerics = ts.isTypeReferenceNode(parameter.type)
+        ? parameter.type.typeArguments?.length > 0
+        : false;
+
+      const injectedName =
+        injectTokenIdentifierName ||
+        (ts.isTypeReferenceNode(parameter.type)
+          ? parameter.type.typeName.getText()
+          : parameter.type.getText());
+
       const initializer = ts.factory.createCallExpression(
         ts.factory.createIdentifier('inject'),
         [],
         [
-          ts.factory.createIdentifier(
-            injectTokenIdentifierName || parameter.type.getText()
-          ),
+          ts.factory.createIdentifier(injectedName),
           ...(optionsProperties.length
             ? [ts.factory.createObjectLiteralExpression(optionsProperties)]
             : []),
@@ -331,7 +339,7 @@ function extractConstructorParamsProperties({
         modifiers,
         parameter.name.getText(),
         parameter.questionToken,
-        undefined,
+        isTypeGenerics ? parameter.type : undefined,
         initializer
       );
     });
