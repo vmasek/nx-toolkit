@@ -1,4 +1,4 @@
-import { createTree } from '@nx/devkit/testing';
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { formatFiles, Tree } from '@nx/devkit';
 import migration from './generator';
 import { join } from 'path';
@@ -16,7 +16,7 @@ describe('migrate constructor parameters to class properties', () => {
   let tree: Tree;
 
   beforeEach(() => {
-    tree = createTree();
+    tree = createTreeWithEmptyWorkspace();
   });
 
   it('should migrate simple component', async () =>
