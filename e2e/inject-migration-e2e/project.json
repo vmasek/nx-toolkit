@@ -5,14 +5,15 @@
   "sourceRoot": "e2e/inject-migration-e2e/src",
   "targets": {
     "e2e": {
-      "executor": "@nrwl/nx-plugin:e2e",
+      "executor": "@nx/jest:jest",
       "options": {
-        "target": "inject-migration:build",
-        "jestConfig": "e2e/inject-migration-e2e/jest.config.ts"
-      }
+        "jestConfig": "e2e/inject-migration-e2e/jest.config.ts",
+        "runInBand": true
+      },
+      "dependsOn": ["inject-migration:build"]
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["e2e/inject-migration-e2e/**/*.ts"]

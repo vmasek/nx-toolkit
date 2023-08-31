@@ -3,7 +3,7 @@ import {
   getProjects,
   visitNotIgnoredFiles,
   formatFiles,
-} from '@nrwl/devkit';
+} from '@nx/devkit';
 import * as ts from 'typescript';
 import { InjectMigrationGeneratorSchema } from './schema';
 import { escapeNewLines, lowerCaseFirstLetter, restoreNewLines } from './utils';

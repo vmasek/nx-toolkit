@@ -1,5 +1,5 @@
-import { createTree } from '@nrwl/devkit/testing';
-import { formatFiles, Tree } from '@nrwl/devkit';
+import { createTree } from '@nx/devkit/testing';
+import { formatFiles, Tree } from '@nx/devkit';
 import migration from './generator';
 import { join } from 'path';
 import { expect } from '@jest/globals';
