@@ -13,7 +13,7 @@
       "dependsOn": ["inject-migration:build"]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["e2e/inject-migration-e2e/**/*.ts"]
