@@ -25,6 +25,6 @@ interface MyState {
 
 @Component({})
 export class TestPseudoComponent {
-  foo: Store<MyState> = inject(Store);
+  foo = inject<Store<MyState>>(Store);
 }`,
 ] as [string, string];

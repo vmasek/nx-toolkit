@@ -326,7 +326,7 @@ function extractConstructorParamsProperties({
 
       const initializer = ts.factory.createCallExpression(
         ts.factory.createIdentifier('inject'),
-        [],
+        isTypeGenerics ? [parameter.type] : [],
         [
           ts.factory.createIdentifier(injectedName),
           ...(optionsProperties.length
@@ -339,7 +339,7 @@ function extractConstructorParamsProperties({
         modifiers,
         parameter.name.getText(),
         parameter.questionToken,
-        isTypeGenerics ? parameter.type : undefined,
+        undefined,
         initializer
       );
     });
