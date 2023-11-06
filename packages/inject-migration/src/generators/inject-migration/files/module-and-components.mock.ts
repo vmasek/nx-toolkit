@@ -32,7 +32,7 @@ import { CommonModule } from '@angular/common';
 export class ComponentOne {
   readonly wololo = inject(Foo);
   constructor() {
-    wololo.subscribe();
+    this.wololo.subscribe();
   }
 }
 

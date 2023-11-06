@@ -3,7 +3,6 @@ import {
   getProjects,
   Tree,
   visitNotIgnoredFiles,
-  formatFiles,
 } from '@nx/devkit';
 import { prompt } from 'enquirer';
 import * as ts from 'typescript';
@@ -64,6 +63,93 @@ export default async function (
   await formatFiles(tree);
 }
 
+function transformConstructorBodyNonThisAccessorParamUsages(
+  context: ts.TransformationContext
+) {
+  return (sourceFile: ts.SourceFile) => {
+    function visit(node: ts.Node): ts.Node {
+      // If the node is a constructor declaration
+      if (ts.isConstructorDeclaration(node)) {
+        // Extract the public or private parameters from the constructor
+        const paramsToReplace = node.parameters
+          .filter(
+            (param) =>
+              ts.isParameter(param) &&
+              (param.modifiers?.some(
+                (mod) => mod.kind === ts.SyntaxKind.PublicKeyword
+              ) ||
+                param.modifiers?.some(
+                  (mod) => mod.kind === ts.SyntaxKind.PrivateKeyword
+                ))
+          )
+          .map((param) => param.name.getText(sourceFile));
+
+        // If there are no public or private parameters, no need to modify the constructor
+        if (paramsToReplace.length === 0) {
+          return node;
+        }
+
+        // Function to replace the identifier nodes in the constructor body
+        const replaceIdentifiers = (node: ts.Node): ts.Node => {
+          if (
+            ts.isIdentifier(node) &&
+            paramsToReplace.includes(node.getText(sourceFile))
+          ) {
+            const parent = node.parent;
+            if (
+              ts.isPropertyAccessExpression(parent) &&
+              parent.expression.kind === ts.SyntaxKind.ThisKeyword
+            ) {
+              // The identifier is already prefixed with 'this.', so no need to replace it.
+              return node;
+            }
+
+            return ts.factory.createPropertyAccessExpression(
+              ts.factory.createThis(),
+              node
+            );
+          }
+          return ts.visitEachChild(node, replaceIdentifiers, context);
+        };
+
+        // Replace the identifiers in the constructor body
+        const updatedBody = ts.visitNodes(
+          node.body?.statements,
+          replaceIdentifiers
+        ) as unknown as ts.Statement[];
+
+        // Create a new constructor node with the updated body
+        return ts.factory.updateConstructorDeclaration(
+          node,
+          node.modifiers,
+          node.parameters,
+          ts.factory.updateBlock(node.body, updatedBody)
+        );
+      }
+      return ts.visitEachChild(node, visit, context);
+    }
+
+    return ts.visitNode(sourceFile, visit);
+  };
+}
+
+function transformConstructorBodyAccessors(sourceFile: ts.SourceFile): string {
+  const result = ts.transform(sourceFile, [
+    transformConstructorBodyNonThisAccessorParamUsages,
+  ]);
+  const printer = ts.createPrinter({
+    removeComments: false,
+    omitTrailingSemicolon: false,
+  });
+  const transformedCode = printer.printNode(
+    ts.EmitHint.Unspecified,
+    result.transformed[0],
+    sourceFile
+  );
+  result.dispose();
+  return transformedCode;
+}
+
 function fileVisitor(tree: Tree) {
   return (filePath: string) => {
     if (!filePath.endsWith('.ts')) {
@@ -75,21 +161,35 @@ function fileVisitor(tree: Tree) {
       return;
     }
 
-    const sourceFile = ts.createSourceFile(
+    const sourceFileBeforeBodyThisTransform = ts.createSourceFile(
       filePath,
       escapeNewLines(fileContent),
       ts.ScriptTarget.Latest,
       true
     );
 
+    const sourceFile = ts.createSourceFile(
+      filePath,
+      transformConstructorBodyAccessors(sourceFileBeforeBodyThisTransform),
+      ts.ScriptTarget.Latest,
+      true
+    );
+
     const changes = getChanges(sourceFile.statements);
 
-    console.log('~~ ', filePath, changes.length);
     if (changes.length > 0) {
       const updatedFile = ts.factory.updateSourceFile(sourceFile, changes);
-      const printer = ts.createPrinter();
+      const printer = ts.createPrinter({
+        removeComments: false,
+        omitTrailingSemicolon: false,
+      });
 
-      tree.write(filePath, restoreNewLines(printer.printFile(updatedFile)));
+      tree.write(
+        filePath,
+        restoreNewLines(
+          printer.printNode(ts.EmitHint.Unspecified, updatedFile, sourceFile)
+        )
+      );
     }
   };
 }
@@ -115,7 +215,7 @@ function getDecoratorArguments({
 
 function isConstructorEmpty({ body, parameters }: ts.ConstructorDeclaration) {
   const hasParameters = parameters.length > 0;
-  const hasBody = body?.getText().trim() !== '{}';
+  const hasBody = body?.getText().replace(/\s/, '') !== '{}';
 
   return !hasParameters && !hasBody;
 }
@@ -190,8 +290,6 @@ function getChanges(
 
     return statement;
   });
-
-  console.log('~~ ', { shouldPerformChanges });
 
   if (shouldPerformChanges) {
     return addInjectImport(changes);

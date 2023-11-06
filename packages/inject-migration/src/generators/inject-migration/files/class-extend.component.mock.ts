@@ -27,7 +27,7 @@ export class TestPseudoComponent extends MyClass {
   foo = inject(Foo);
   private bar = inject(Bar);
   constructor() {
-    super(bar);
+    super(this.bar);
   }
 }`,
 ] as [string, string];
