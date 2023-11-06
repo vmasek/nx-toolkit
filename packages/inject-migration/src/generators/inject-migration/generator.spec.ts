@@ -61,7 +61,7 @@ async function compareFileMigration(
 
   // Run the generator to migrate the constructor parameters to class properties
   await migration(tree, {
-    projectName: 'file-to-transform.ts',
+    targets: ['*'],
   });
 
   // Check that the constructor parameters were migrated to class properties

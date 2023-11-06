@@ -1,9 +1,11 @@
 import {
-  Tree,
+  formatFiles,
   getProjects,
+  Tree,
   visitNotIgnoredFiles,
   formatFiles,
 } from '@nx/devkit';
+import { prompt } from 'enquirer';
 import * as ts from 'typescript';
 import { InjectMigrationGeneratorSchema } from './schema';
 import { escapeNewLines, lowerCaseFirstLetter, restoreNewLines } from './utils';
@@ -14,25 +16,49 @@ const SUPPORTED_MIGRATION_TARGETS = [
   'Pipe',
   'Injectable',
 ];
+const ALL_TARGETS_CHOICE = '* (all)';
 
 export default async function (
   tree: Tree,
-  { projectName }: InjectMigrationGeneratorSchema
+  options: InjectMigrationGeneratorSchema
 ): Promise<void> {
   const projects = getProjects(tree);
 
-  if (projects.size > 0) {
-    for (const [name, project] of projects) {
-      if (projectName && projectName !== name) {
-        return;
-      }
-      // TODO: rewrite to nicer prompt
-      console.info(`Running migration for project ${name}`);
+  const selectedTargets: string[] = (
+    options.targets
+      ? options
+      : await prompt([
+          {
+            type: 'multiselect',
+            name: 'targets',
+            message: 'Select the targets or libraries you want to target:',
+            choices: [ALL_TARGETS_CHOICE, ...projects.keys()],
+            required: true,
+          },
+        ])
+  )['targets'];
 
+  if (!selectedTargets?.length) {
+    console.info('Migration is terminated as no target was selected.');
+    return;
+  }
+
+  if (
+    selectedTargets.find(
+      (target) => target === '*' || target === ALL_TARGETS_CHOICE
+    )
+  ) {
+    console.info(`Running migration for all available targets.`);
+    visitNotIgnoredFiles(tree, '.', fileVisitor(tree));
+  } else {
+    for (const [name, project] of projects) {
+      if (!selectedTargets.includes(name)) {
+        continue;
+      }
+
+      console.info(`Running migration for target ${name}`);
       visitNotIgnoredFiles(tree, project.root, fileVisitor(tree));
     }
-  } else {
-    visitNotIgnoredFiles(tree, '.', fileVisitor(tree));
   }
 
   await formatFiles(tree);

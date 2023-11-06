@@ -4,14 +4,13 @@
   "title": "",
   "type": "object",
   "properties": {
-    "project": {
-      "type": "string",
-      "description": "Limit to target project",
+    "targets": {
+      "type": "array",
+      "description": "Limit to target specific projects or libs",
       "$default": {
         "$source": "argv",
         "index": 0
-      },
-      "x-prompt": "What project name should migration run for (default/empty is all)?"
+      }
     }
   },
   "required": []
