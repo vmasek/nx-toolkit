@@ -1,9 +1,12 @@
 {
-  "name": "migrations",
-  "version": "0.0.0",
+  "name": "@vmasek/nx-toolkit",
+  "version": "1.0.0",
   "license": "MIT",
   "scripts": {},
-  "private": true,
+  "repository": {
+    "url": "https://github.com/vmasek/nx-toolkit"
+  },
+  "private": false,
   "devDependencies": {
     "@swc-node/register": "1.6.8",
     "@swc/cli": "0.1.62",
