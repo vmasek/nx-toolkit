@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
   "name": "@vmasek/inject-migration",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "generators": {
     "inject-migration": {
       "factory": "./src/generators/inject-migration/generator",
