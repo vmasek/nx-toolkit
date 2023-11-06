@@ -1,6 +1,9 @@
 {
-  "name": "@migrations/inject-migration",
-  "version": "0.0.1",
+  "name": "@vmasek/inject-migration",
+  "version": "0.9.0",
+  "repository": {
+    "url": "https://github.com/vmasek/nx-toolkit"
+  },
   "main": "src/index.js",
   "generators": "./generators.json",
   "executors": "./executors.json"
