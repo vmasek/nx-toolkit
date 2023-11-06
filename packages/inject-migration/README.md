@@ -1,6 +1,12 @@
 # inject-migration
 
-This library was generated with [Nx](https://nx.dev).
+# Usage
+
+1. Temporary install the migration with:
+   `npm i -D @vmasek/inject-migration`
+2. Run `npx nx g @vmasek/inject-migration:inject-migration`
+3. Verify the changes
+4. Remove temporary package (if not needed for more migrations)
 
 ## Building
 
